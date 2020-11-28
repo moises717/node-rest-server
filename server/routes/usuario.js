@@ -15,7 +15,7 @@ app.get("/usuario", function (req, res) {
 	let limite = req.query.limite || 5;
 	limite = Number(limite);
 
-	Usuario.find({})
+	Usuario.find({}, "_id nombre email estado google role")
 		.skip(desde)
 		.limit(5)
 		.exec((err, usuarios) => {
@@ -23,7 +23,9 @@ app.get("/usuario", function (req, res) {
 				return res.status(400).json({ ok: false, err });
 			}
 
-			res.json({ ok: true, usuarios });
+			Usuario.count({}, (err, conteo) => {
+				res.json({ ok: true, usuarios, cuantos: conteo });
+			});
 		});
 });
 
@@ -67,8 +69,25 @@ app.put("/usuario/:id", function (req, res) {
 	);
 });
 
-app.delete("/usuario", function (req, res) {
-	res.json("delete usuarios");
+app.delete("/usuario/:id", function (req, res) {
+	let id = req.params.id;
+
+	Usuario.findByIdAndRemove(id, (err, usuarioDelete) => {
+		if (err) {
+			return res.status(400).json({ ok: false, err });
+		}
+
+		if (!usuarioDelete) {
+			return res
+				.status(400)
+				.json({ ok: false, err: { message: "Usuario no encontrado" } });
+		}
+
+		res.json({
+			ok: true,
+			usuario: usuarioDelete,
+		});
+	});
 });
 
 module.exports = app;
