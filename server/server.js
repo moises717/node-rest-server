@@ -12,7 +12,7 @@ app.use(bodyparser.json());
 app.use(require("./routes/usuario"));
 
 mongoose.connect(
-	"mongodb://localhost:27017/cafe",
+	process.env.URLDB,
 	{
 		useNewUrlParser: true,
 		useUnifiedTopology: true,
