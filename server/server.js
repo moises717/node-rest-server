@@ -9,7 +9,8 @@ app.use(bodyparser.urlencoded({ extended: true }));
 
 app.use(bodyparser.json());
 
-app.use(require("./routes/usuario"));
+// Cofiguracion global de rutas
+app.use(require("./routes/index"));
 
 mongoose.connect(
 	process.env.URLDB,

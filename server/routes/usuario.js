@@ -5,10 +5,14 @@ const bcrypt = require("bcrypt");
 const _ = require("underscore");
 
 const Usuario = require("../models/usuario");
+const {
+	verificaToken,
+	verificaAdminRole,
+} = require("../middlewares/autenticacion");
 
 const app = express();
 
-app.get("/usuario", function (req, res) {
+app.get("/usuario", verificaToken, (req, res) => {
 	let desde = req.query.desde || 0;
 	desde = Number(desde);
 
@@ -29,7 +33,7 @@ app.get("/usuario", function (req, res) {
 		});
 });
 
-app.post("/usuario", function (req, res) {
+app.post("/usuario", [verificaToken, verificaAdminRole], function (req, res) {
 	let body = req.body;
 
 	let usuario = new Usuario({
@@ -48,7 +52,7 @@ app.post("/usuario", function (req, res) {
 	});
 });
 
-app.put("/usuario/:id", function (req, res) {
+app.put("/usuario/:id", verificaToken, function (req, res) {
 	let id = req.params.id;
 	let body = _.pick(req.body, ["nombre", "email", "img", "role", "estado"]);
 
@@ -69,33 +73,37 @@ app.put("/usuario/:id", function (req, res) {
 	);
 });
 
-app.delete("/usuario/:id", function (req, res) {
-	let id = req.params.id;
-	let cambiaEstado = {
-		estado: !req.body.estado || true,
-	};
+app.delete(
+	"/usuario/:id",
+	[verificaToken, verificaAdminRole],
+	function (req, res) {
+		let id = req.params.id;
+		let cambiaEstado = {
+			estado: !req.body.estado || true,
+		};
 
-	Usuario.findByIdAndUpdate(
-		id,
-		cambiaEstado,
-		{ new: true },
-		(err, usuarioDelete) => {
-			if (err) {
-				return res.status(400).json({ ok: false, err });
+		Usuario.findByIdAndUpdate(
+			id,
+			cambiaEstado,
+			{ new: true },
+			(err, usuarioDelete) => {
+				if (err) {
+					return res.status(400).json({ ok: false, err });
+				}
+
+				if (!usuarioDelete) {
+					return res
+						.status(400)
+						.json({ ok: false, err: { message: "Usuario no encontrado" } });
+				}
+
+				res.json({
+					ok: true,
+					usuario: usuarioDelete,
+				});
 			}
-
-			if (!usuarioDelete) {
-				return res
-					.status(400)
-					.json({ ok: false, err: { message: "Usuario no encontrado" } });
-			}
-
-			res.json({
-				ok: true,
-				usuario: usuarioDelete,
-			});
-		}
-	);
-});
+		);
+	}
+);
 
 module.exports = app;
