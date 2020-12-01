@@ -2,12 +2,16 @@ require("./config/config");
 const express = require("express");
 const bodyparser = require("body-parser");
 const mongoose = require("mongoose");
+const path = require("path");
 
 const app = express();
 
 app.use(bodyparser.urlencoded({ extended: true }));
 
 app.use(bodyparser.json());
+
+//Habilitar la carpeta publica
+app.use(express.static(path.resolve(__dirname, "../public")));
 
 // Cofiguracion global de rutas
 app.use(require("./routes/index"));
