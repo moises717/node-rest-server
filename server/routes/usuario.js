@@ -43,8 +43,6 @@ app.post("/usuario", function (req, res) {
 		role: body.role,
 	});
 
-	console.log(usuario);
-
 	usuario.save((err, usuarioDB) => {
 		if (err) {
 			return res.status(400).json({ ok: false, err });
