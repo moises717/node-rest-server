@@ -45,10 +45,10 @@ app.post("/usuario", function (req, res) {
 
 	usuario.save((err, usuarioDB) => {
 		if (err) {
-			return res.status(400).json({ ok: false, err });
+			return res.status(400).json({ ok: false, err: err });
 		}
 
-		res.json({ ok: true, usuario: usuarioDB });
+		res.json({ ok: true, usuarioCreado: usuarioDB });
 	});
 });
 
